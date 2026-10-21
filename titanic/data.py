@@ -95,3 +95,20 @@ def unique_values_summary(df: pd.DataFrame) -> pd.DataFrame:
     tt.columns = ["Total"]
     tt["Uniques"] = [df[col].nunique() for col in df.columns]
     return np.transpose(tt)
+
+
+def combine_train_test(train_df: pd.DataFrame, test_df: pd.DataFrame) -> pd.DataFrame:
+    """Stack the train and test data into one DataFrame.
+
+    Args:
+        train_df: The training data (with a "Survived" column).
+        test_df: The test data (without "Survived").
+
+    Returns:
+        A DataFrame with all passengers and a "set" column that says whether
+        each row comes from "train" or "test".
+    """
+    all_df = pd.concat([train_df, test_df], axis=0)
+    all_df["set"] = "train"
+    all_df.loc[all_df.Survived.isna(), "set"] = "test"
+    return all_df
