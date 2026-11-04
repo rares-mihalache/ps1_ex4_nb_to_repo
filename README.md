@@ -7,9 +7,11 @@ This repository refactors a Jupyter notebook analysing the Titanic dataset into 
 - `data/`: the Titanic datasets (`train.csv`, `test.csv`, `gender_submission.csv`)
 - `titanic/data.py`: loading and inspecting the data
 - `titanic/features.py`: feature engineering
-- `titanic/plotting.py`: plotting functions
+- `titanic/plotting.py`: plotting functions, and `save_fig` for saving figures
 - `titanic/model.py`: training and evaluating the model
 - `Titanic Data Journey.ipynb`: the analysis notebook, which calls the functions above
+- `figures/`: figures saved for the report
+- `report.ipynb`: a short report (max 500 words) on which features matter for survival
 
 ## Setup
 
