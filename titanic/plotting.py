@@ -109,3 +109,88 @@ def plot_distribution_pairs(
     if save_as is not None:
         save_fig(fig, save_as)
     plt.show()
+
+
+# Colour-blind-friendly colours (Okabe-Ito) for bars that compare groups: the
+# lightest colour in COLOR_LIST is too pale to read on a white background.
+RATE_COLORS = ["#0072B2", "#E69F00", "#009E73"]
+
+
+def plot_survival_rate(
+    data_df: pd.DataFrame,
+    feature: str,
+    title: str,
+    hue: str | None = None,
+    save_as: str | None = None,
+) -> None:
+    """Plot the survival rate for each value of a column, optionally split by ``hue``.
+
+    Each bar is labelled with its rate and its number of passengers, so that a
+    rate based on very few passengers is easy to spot.
+
+    Args:
+        data_df: Data with a "Survived" column, e.g. ``train_df``.
+        feature: The column whose values go on the x-axis, e.g. "Pclass".
+        title: The plot title.
+        hue: The column used to split and colour the bars, e.g. "Sex".
+        save_as: If given, the plot is also saved to the "figures" folder
+            under this name (see ``save_fig``).
+    """
+    data_df = data_df.dropna(subset=["Survived", feature])
+    rates = data_df.pivot_table(
+        index=feature, columns=hue, values="Survived", aggfunc="mean"
+    )
+    rates = rates * 100
+    counts = data_df.pivot_table(
+        index=feature, columns=hue, values="Survived", aggfunc="count"
+    )
+    colors = RATE_COLORS[: rates.shape[1]]
+
+    fig, ax = plt.subplots(1, 1, figsize=(8, 4.5))
+    rates.plot.bar(ax=ax, color=colors, width=0.8, rot=0, legend=hue is not None)
+    for container, column in zip(ax.containers, rates.columns):
+        labels = [
+            f"{rate:.0f}%\n(n={count:.0f})"
+            for rate, count in zip(rates[column], counts[column])
+        ]
+        ax.bar_label(container, labels=labels, fontsize=9, padding=2)
+    ax.set_ylim(0, 115)
+    ax.set_ylabel("Survival rate (%)")
+    ax.set_title(title, loc="left", fontweight="bold")
+    ax.spines[["top", "right"]].set_visible(False)
+    if save_as is not None:
+        save_fig(fig, save_as)
+    plt.show()
+
+
+def plot_correlation_heatmap(
+    data_df: pd.DataFrame,
+    columns: list[str],
+    title: str,
+    save_as: str | None = None,
+) -> None:
+    """Plot the correlations between numeric columns as a heatmap.
+
+    Args:
+        data_df: Data with numeric versions of ``columns``, e.g. ``train_df``.
+        columns: The columns to compare, e.g. ["Survived", "Pclass", "Fare"].
+        title: The plot title.
+        save_as: If given, the plot is also saved to the "figures" folder
+            under this name (see ``save_fig``).
+    """
+    fig, ax = plt.subplots(1, 1, figsize=(7, 5.5))
+    sns.heatmap(
+        data_df[columns].corr(),
+        annot=True,
+        fmt=".2f",
+        cmap="RdBu_r",
+        vmin=-1,
+        vmax=1,
+        square=True,
+        linewidths=1,
+        ax=ax,
+    )
+    ax.set_title(title, loc="left", fontweight="bold")
+    if save_as is not None:
+        save_fig(fig, save_as)
+    plt.show()
